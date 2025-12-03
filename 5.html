@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五行職場關係指南</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .serif {
+            font-family: 'Noto Serif TC', serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Element Colors */
+        .wood-bg { background-color: #dcfce7; color: #14532d; }
+        .wood-border { border-color: #22c55e; }
+        .fire-bg { background-color: #fee2e2; color: #7f1d1d; }
+        .fire-border { border-color: #ef4444; }
+        .earth-bg { background-color: #fef3c7; color: #78350f; }
+        .earth-border { border-color: #f59e0b; }
+        .metal-bg { background-color: #f1f5f9; color: #334155; }
+        .metal-border { border-color: #64748b; }
+        .water-bg { background-color: #dbeafe; color: #1e3a8a; }
+        .water-border { border-color: #3b82f6; }
+
+        .element-btn {
+            transition: all 0.3s ease;
+        }
+        .element-btn:hover {
+            transform: scale(1.05);
+        }
+        .element-btn.active {
+            transform: scale(1.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const elementsData = {
+            fire: {
+                id: 'fire',
+                name: '火形人',
+                icon: '🔥',
+                colorClass: 'fire',
+                traits: {
+                    pros: ['反應快、創意多', '執行力強', '有遠見'],
+                    cons: ['獨斷獨行、沒耐性', '好管閒事', '容易虎頭蛇尾', '不小心得罪人']
+                },
+                partners: [
+                    { name: '木行人', role: '軍師/後盾', desc: '提供源源不絕的知識與資源，安撫得罪的人。' },
+                    { name: '土行人', role: '執行/收尾', desc: '包容錯誤，幫忙擦屁股，讓創意落地實現。' }
+                ],
+                enemies: [
+                    { 
+                        name: '水行人', 
+                        conflict: '觀念不合', 
+                        desc: '火覺得水只會社交不做事；水覺得火創意沒用，錢才有用。',
+                        solution: '加入「木行人」：轉化水的社交能量為資源，供給火執行。' 
+                    }
+                ]
+            },
+            wood: {
+                id: 'wood',
+                name: '木形人',
+                icon: '🌳',
+                colorClass: 'wood',
+                traits: {
+                    pros: ['見多識廣', '可塑性高', '有同理心', '大器晚成'],
+                    cons: ['猶豫不決', '易受環境影響', '容易錯失機會', '存在感低']
+                },
+                partners: [
+                    { name: '水行人', role: '人脈/資源', desc: '攏絡資源支持木成長，拓展商機。' },
+                    { name: '火行人', role: '先鋒/落地', desc: '將想法快速執行，創造實際成績。' }
+                ],
+                enemies: [
+                    { 
+                        name: '金行人', 
+                        conflict: '限制發展', 
+                        desc: '金強制規則，限制木的成長與自由。',
+                        solution: '加入「水行人」：以柔克剛，讓金變得有人情味，轉而保護木。' 
+                    },
+                    { 
+                        name: '土行人', 
+                        conflict: '空轉內耗', 
+                        desc: '土反應慢，木覺得一直在輸出卻在做白工。',
+                        solution: '加入「火行人」：給土動力，並將木的知識轉化為土的方向。' 
+                    }
+                ]
+            },
+            water: {
+                id: 'water',
+                name: '水形人',
+                icon: '💧',
+                colorClass: 'water',
+                traits: {
+                    pros: ['善於交際', '聰明靈活', '口才好', '資源整合'],
+                    cons: ['容易懶散', '做事無原則', '喜歡走捷徑', '面是背非']
+                },
+                partners: [
+                    { name: '木行人', role: '戰略導師', desc: '提供智慧讓水有戰略觀，避免因小失大。' },
+                    { name: '金行人', role: '規範者', desc: '提供規則與強硬手段，協助建構關鍵人脈。' }
+                ],
+                enemies: [
+                    { 
+                        name: '土行人', 
+                        conflict: '阻礙流動', 
+                        desc: '土固執保守，讓水覺得綁手綁腳。',
+                        solution: '加入「金行人」：將土的固執轉化為原則，有效導向水的運作。' 
+                    },
+                    { 
+                        name: '火行人', 
+                        conflict: '互看不順', 
+                        desc: '覺得對方虛偽 vs 覺得對方魯莽。',
+                        solution: '加入「木行人」：居中協調，讓水的資源能支持火的執行。' 
+                    }
+                ]
+            },
+            metal: {
+                id: 'metal',
+                name: '金形人',
+                icon: '⚔️',
+                colorClass: 'metal',
+                traits: {
+                    pros: ['講義氣、有原則', '意志堅定', '領導力強', '判斷精準'],
+                    cons: ['剛愎自用', '刻薄寡恩', '易得罪人', '不知變通']
+                },
+                partners: [
+                    { name: '水行人', role: '潤滑劑', desc: '以柔克剛，幫金潤滑人際關係，帶來靈活性。' },
+                    { name: '土行人', role: '後勤支持', desc: '提供穩定資源，讓金無後顧之憂去執行。' }
+                ],
+                enemies: [
+                    { 
+                        name: '火行人', 
+                        conflict: '直接衝擊', 
+                        desc: '火會攻擊金的原則，甚至用激烈手段鬥爭。',
+                        solution: '加入「土行人」：吸收火的砲火，轉化為對金的實質支持。' 
+                    }
+                ]
+            },
+            earth: {
+                id: 'earth',
+                name: '土形人',
+                icon: '⛰️',
+                colorClass: 'earth',
+                traits: {
+                    pros: ['誠實守信', '穩重踏實', '包容力強', '專業技術強'],
+                    cons: ['反應慢', '固執保守', '不懂變通', '缺乏熱情']
+                },
+                partners: [
+                    { name: '火行人', role: '發動機', desc: '給予動力與方向，讓被動的土動起來。' },
+                    { name: '金行人', role: '經紀人', desc: '制定規則，將土的專業成果發揚光大。' }
+                ],
+                enemies: [
+                    { 
+                        name: '木行人', 
+                        conflict: '被佔便宜', 
+                        desc: '木一直吸取土的資源，土反應慢容易被控制。',
+                        solution: '加入「火行人」：木生火，火生土。想法先透過火執行，再由土承接。' 
+                    },
+                    { 
+                        name: '水行人', 
+                        conflict: '破壞結構', 
+                        desc: '水太靈活，土覺得不可靠，甚至破壞土的穩定。',
+                        solution: '加入「金行人」：透過金規範水，讓土的資源有效導向商業。' 
+                    }
+                ]
+            }
+        };
+
+        const Icon = ({ name, size = 20, className }) => {
+            useEffect(() => {
+                lucide.createIcons();
+            }, [name]);
+            return <i data-lucide={name} width={size} height={size} className={className}></i>;
+        };
+
+        // --- COMPONENTS ---
+
+        const ElementSelector = ({ element, isActive, onClick }) => {
+            const colors = {
+                fire: 'bg-red-100 text-red-800 border-red-300 hover:bg-red-200',
+                wood: 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200',
+                water: 'bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-200',
+                metal: 'bg-slate-100 text-slate-800 border-slate-300 hover:bg-slate-200',
+                earth: 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200',
+            };
+            
+            const activeColors = {
+                fire: 'bg-red-600 text-white border-red-600 shadow-red-200',
+                wood: 'bg-green-600 text-white border-green-600 shadow-green-200',
+                water: 'bg-blue-600 text-white border-blue-600 shadow-blue-200',
+                metal: 'bg-slate-600 text-white border-slate-600 shadow-slate-200',
+                earth: 'bg-amber-600 text-white border-amber-600 shadow-amber-200',
+            };
+
+            const baseClass = `element-btn flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer shadow-sm w-20 h-24 md:w-24 md:h-28 mx-1`;
+            const colorClass = isActive ? activeColors[element.id] : colors[element.id];
+
+            return (
+                <div className={`${baseClass} ${colorClass}`} onClick={onClick}>
+                    <div className="text-3xl mb-1">{element.icon}</div>
+                    <div className="font-bold text-sm md:text-base">{element.name}</div>
+                </div>
+            );
+        };
+
+        const AnalysisView = ({ data }) => {
+            const colorMap = {
+                fire: { text: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-800' },
+                wood: { text: 'text-green-700', bg: 'bg-green-50', border: 'border-green-200', badge: 'bg-green-100 text-green-800' },
+                water: { text: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-800' },
+                metal: { text: 'text-slate-700', bg: 'bg-slate-50', border: 'border-slate-200', badge: 'bg-slate-100 text-slate-800' },
+                earth: { text: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-800' },
+            };
+            const theme = colorMap[data.id];
+            const [selectedEnemy, setSelectedEnemy] = useState(null);
+
+            // Reset selected enemy when data changes (e.g. switching tabs)
+            useEffect(() => {
+                setSelectedEnemy(null);
+            }, [data]);
+
+
+            return (
+                <div className="fade-in max-w-4xl mx-auto">
+                    {/* Header Section */}
+                    <div className={`text-center p-8 rounded-3xl mb-8 border-4 ${theme.border} ${theme.bg} shadow-lg relative overflow-hidden`}>
+                        <div className="absolute top-0 right-0 -mt-4 -mr-4 text-9xl opacity-10 pointer-events-none select-none">{data.icon}</div>
+                        <div className="text-6xl mb-4">{data.icon}</div>
+                        <h2 className={`text-4xl font-bold mb-2 ${theme.text}`}>{data.name}</h2>
+                        <p className="text-gray-600 font-medium">職場性格分析</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        {/* Pros */}
+                        <div className="bg-white p-6 rounded-2xl shadow-md border-l-8 border-green-400">
+                            <h3 className="flex items-center text-xl font-bold text-gray-800 mb-4">
+                                <Icon name="thumbs-up" className="mr-2 text-green-500" /> 優勢特質
+                            </h3>
+                            <ul className="space-y-2">
+                                {data.traits.pros.map((trait, i) => (
+                                    <li key={i} className="flex items-start">
+                                        <Icon name="check" size={18} className="mr-2 mt-1 text-green-500 flex-shrink-0" />
+                                        <span className="text-gray-700">{trait}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        {/* Cons */}
+                        <div className="bg-white p-6 rounded-2xl shadow-md border-l-8 border-red-400">
+                            <h3 className="flex items-center text-xl font-bold text-gray-800 mb-4">
+                                <Icon name="alert-triangle" className="mr-2 text-red-500" /> 潛在弱點
+                            </h3>
+                            <ul className="space-y-2">
+                                {data.traits.cons.map((trait, i) => (
+                                    <li key={i} className="flex items-start">
+                                        <Icon name="x" size={18} className="mr-2 mt-1 text-red-500 flex-shrink-0" />
+                                        <span className="text-gray-700">{trait}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Relationship Calculator Section - Merged here */}
+                    <div className="mt-8 bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+                        <div className="p-6 bg-gray-50 border-b border-gray-200">
+                            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <Icon name="swords" className="w-6 h-6 text-red-500" />
+                                職場關係計算機
+                            </h3>
+                            <p className="text-gray-500 text-sm mt-1">點擊下方的「天敵」查看化解方案</p>
+                        </div>
+                        
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Left: Noble & Enemy Lists */}
+                            <div className="space-y-6">
+                                <div>
+                                    <h4 className="font-bold text-emerald-600 mb-3 flex items-center gap-2">
+                                        <Icon name="crown" className="w-5 h-5" /> 貴人 (最佳拍檔)
+                                    </h4>
+                                    <div className="space-y-2">
+                                        {data.partners.map((p, i) => (
+                                            <div key={i} className="p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-sm">
+                                                <span className="font-bold text-emerald-800">{p.name}</span>
+                                                <span className="mx-2 text-emerald-300">|</span>
+                                                <span className="text-emerald-700">{p.desc}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 className="font-bold text-rose-600 mb-3 flex items-center gap-2">
+                                        <Icon name="skull" className="w-5 h-5" /> 天敵 (相剋)
+                                    </h4>
+                                    <div className="space-y-2">
+                                        {data.enemies.map((e, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => setSelectedEnemy(e)}
+                                                className={`w-full text-left p-3 rounded-lg border transition-all duration-200 text-sm flex justify-between items-center
+                                                    ${selectedEnemy === e 
+                                                        ? 'bg-rose-100 border-rose-300 ring-2 ring-rose-200' 
+                                                        : 'bg-white border-gray-200 hover:border-rose-300 hover:bg-rose-50'}`}
+                                            >
+                                                <span>
+                                                    <span className="font-bold text-rose-800">{e.name}</span>
+                                                    <span className="mx-2 text-gray-300">|</span>
+                                                    <span className="text-gray-600">{e.conflict}</span>
+                                                </span>
+                                                <Icon name="chevron-right" className="w-4 h-4 text-gray-400" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right: Solution Area */}
+                            <div className="bg-gray-100 rounded-2xl p-6 flex flex-col justify-center items-center text-center relative min-h-[200px]">
+                                {!selectedEnemy ? (
+                                    <div className="text-gray-400">
+                                        <Icon name="calculator" className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                        <p>請選擇左側的「天敵」<br/>系統將計算最佳化解方案</p>
+                                    </div>
+                                ) : (
+                                    <div className="fade-in w-full">
+                                        <div className="flex justify-center items-center gap-4 mb-6">
+                                            <div className={`px-4 py-2 rounded-lg ${theme.badge} border ${theme.border} font-bold`}>{data.name}</div>
+                                            <Icon name="x" className="w-6 h-6 text-gray-400" />
+                                            <div className="px-4 py-2 rounded-lg bg-gray-700 text-white font-bold">{selectedEnemy.name}</div>
+                                        </div>
+                                        
+                                        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm text-left">
+                                            <h5 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                                <Icon name="sparkles" className="w-5 h-5 text-yellow-500" />
+                                                化解錦囊
+                                            </h5>
+                                            <p className="text-gray-700 leading-relaxed">
+                                                {selectedEnemy.solution}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('wood');
+
+            return (
+                <div className="min-h-screen pb-12 bg-slate-50">
+                    {/* Header */}
+                    <header className="bg-slate-900 text-white py-12 px-4 text-center relative overflow-hidden">
+                        <div className="relative z-10">
+                            <h1 className="text-4xl md:text-5xl font-bold serif mb-2">五行職場關係指南</h1>
+                            <p className="text-slate-400 text-lg">識人、用人、化解衝突的終極智慧</p>
+                        </div>
+                        {/* Decorative Background */}
+                        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                            <div className="absolute top-[-50%] left-[-20%] w-[800px] h-[800px] rounded-full bg-blue-500 blur-3xl"></div>
+                            <div className="absolute bottom-[-50%] right-[-20%] w-[800px] h-[800px] rounded-full bg-purple-500 blur-3xl"></div>
+                        </div>
+                    </header>
+
+                    {/* Navbar */}
+                    <div className="sticky top-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-200">
+                        <div className="max-w-6xl mx-auto px-4 py-4 overflow-x-auto">
+                            <div className="flex justify-center min-w-max space-x-2 md:space-x-4">
+                                {Object.values(elementsData).map(el => (
+                                    <ElementSelector 
+                                        key={el.id} 
+                                        element={el} 
+                                        isActive={activeTab === el.id} 
+                                        onClick={() => setActiveTab(el.id)} 
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <main className="max-w-5xl mx-auto px-4 py-8 fade-in">
+                        <AnalysisView data={elementsData[activeTab]} />
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="max-w-4xl mx-auto px-4 mt-8 text-center text-gray-400 text-sm">
+                        <p className="mb-2">五行相生：木➝火➝土➝金➝水➝木 （貴人邏輯）</p>
+                        <p>五行相剋：木➝土➝水➝火➝金➝木 （天敵邏輯）</p>
+                        <p className="mt-4">© 2023 五行職場分析</p>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
